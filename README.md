@@ -2,4 +2,5 @@
 danmu api server.
 
 # environment
-- go: 1.23.2
+- go: v1.23.2
+- gin: v1.10.0
