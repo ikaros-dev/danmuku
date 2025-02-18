@@ -1,2 +1,6 @@
 app:
   port: 9988
+
+dandanplay:
+  appId:
+  appSecret:

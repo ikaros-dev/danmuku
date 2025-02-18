@@ -8,11 +8,17 @@ import (
 )
 
 type Config struct {
-	App AppConfig `yaml:"app"`
+	App        AppConfig        `yaml:"app"`
+	Dandanplay DandanplayConfig `yaml:"dandanplay"`
 }
 
 type AppConfig struct {
 	Port int `yaml:"port"`
+}
+
+type DandanplayConfig struct {
+	AppId     string `yaml:"appId"`
+	AppSecret string `yaml:"appSecret"`
 }
 
 // LoadConfig 加载配置文件
@@ -56,5 +62,13 @@ func loadConfigFromFile(path string) (*Config, error) {
 func mergeConfig(cfg, localCfg *Config) {
 	if localCfg.App.Port != 0 {
 		cfg.App.Port = localCfg.App.Port
+	}
+
+	if localCfg.Dandanplay.AppId != "" {
+		cfg.Dandanplay.AppId = localCfg.Dandanplay.AppId
+	}
+
+	if localCfg.Dandanplay.AppSecret != "" {
+		cfg.Dandanplay.AppSecret = localCfg.Dandanplay.AppSecret
 	}
 }
