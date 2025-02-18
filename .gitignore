@@ -29,3 +29,6 @@ go.work.sum
 
 # Database file
 *.db
+
+# Config fiel
+config.local.yaml
