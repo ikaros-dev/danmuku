@@ -1,9 +1,9 @@
 package main
 
 import (
-	"danmuku/config"
-	"danmuku/models"
-	"net/http"
+	"run/ikaros/danmuku/config"
+	"run/ikaros/danmuku/models"
+	"run/ikaros/danmuku/routes"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,63 +19,12 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"message": "Hello, Gin!",
+			"message": "Hello, World!",
 		})
 	})
 
-	// 创建用户
-	r.POST("/users", func(c *gin.Context) {
-		var user models.User
-		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		config.DB.Create(&user)
-		c.JSON(http.StatusCreated, user)
-	})
-
-	// 获取所有用户
-	r.GET("/users", func(c *gin.Context) {
-		var users []models.User
-		config.DB.Find(&users)
-		c.JSON(http.StatusOK, users)
-	})
-
-	// 获取单个用户
-	r.GET("/users/:id", func(c *gin.Context) {
-		var user models.User
-		if err := config.DB.First(&user, c.Param("id")).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-		c.JSON(http.StatusOK, user)
-	})
-
-	// 更新用户
-	r.PUT("/users/:id", func(c *gin.Context) {
-		var user models.User
-		if err := config.DB.First(&user, c.Param("id")).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-		if err := c.ShouldBindJSON(&user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		config.DB.Save(&user)
-		c.JSON(http.StatusOK, user)
-	})
-
-	// 删除用户
-	r.DELETE("/users/:id", func(c *gin.Context) {
-		var user models.User
-		if err := config.DB.First(&user, c.Param("id")).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-		config.DB.Delete(&user)
-		c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
-	})
+	// 初始化所有路由
+	routes.SetupRouters(r)
 
 	r.Run() // 默认监听 0.0.0.0:8080
 }

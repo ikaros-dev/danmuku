@@ -1,4 +1,4 @@
-module danmuku
+module run/ikaros/danmuku
 
 go 1.23.2
 
