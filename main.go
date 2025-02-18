@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"run/ikaros/danmuku/config"
 	"run/ikaros/danmuku/models"
 	"run/ikaros/danmuku/routes"
@@ -9,6 +11,12 @@ import (
 )
 
 func main() {
+	// 加载配置文件
+	cfg, err := config.LoadConfig("config.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
 	// 连接数据库
 	config.ConnectDatabase()
 
@@ -26,5 +34,9 @@ func main() {
 	// 初始化所有路由
 	routes.SetupRouters(r)
 
-	r.Run() // 默认监听 0.0.0.0:8080
+	port := cfg.App.Port
+	log.Printf("Starting server on port %d...\n", port)
+	if err := r.Run(":" + fmt.Sprint(port)); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
