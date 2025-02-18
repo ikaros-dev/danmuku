@@ -12,7 +12,7 @@ import (
 
 func main() {
 	// 加载配置文件
-	cfg, err := config.LoadConfig("config.yaml")
+	cfg, err := config.LoadConfig("config.yaml", "config.local.yaml")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
