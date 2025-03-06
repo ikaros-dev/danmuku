@@ -25,7 +25,7 @@ var Cfg Config
 
 // LoadConfig 加载配置文件
 func LoadConfig() {
-	DoLoadConfig("config.yaml", "config.local.yaml")
+	DoLoadConfig("data/config.yaml", "data/config.local.yaml")
 }
 
 func DoLoadConfig(defaultPath, localPath string) (*Config, error) {
