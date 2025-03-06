@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: Build
 
 on:
   push:
@@ -20,8 +20,9 @@ jobs:
       - name: Build
         run: go build -ldflags="-s -w" -trimpath -o danmuku .
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload fast jar to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: danmuku
-          path: danmuku
+          repo_token: ${{ secrets.LI_GUOHAO_TOKEN }}
+          file: /home/runner/work/ikaros/danmuku/danmuku
+          asset_name: danmuku-linux
