@@ -41,6 +41,7 @@ func SearchEpisodesWithKeyword(confg config.Config, anime string, episode string
 	Client.Header.Add("X-AppSecret", appSecret)
 
 	resp, err := Client.R().
+		SetQueryParam("anime", anime).
 		SetResult(&SearchEpisodesResponse{}). // 指定响应的解析类型
 		Get(url)                              // 替换为实际的 API URL
 
