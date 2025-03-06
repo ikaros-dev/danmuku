@@ -9,7 +9,7 @@ import (
 
 func TestSearchEpisodesWithKeyword(t *testing.T) {
 	t.Skip("This test is disabled")
-	config.DoLoadConfig("../../config.yaml", "../../config.local.yaml")
+	config.LoadConfig()
 
 	// 测试搜索功能
 	keyword := "CLANNAD" // 替换为你想要搜索的关键字

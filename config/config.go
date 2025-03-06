@@ -3,6 +3,8 @@ package config
 import (
 	"log"
 	"os"
+	"path/filepath"
+	"run/ikaros/danmuku/utils"
 
 	"gopkg.in/yaml.v3"
 )
@@ -25,10 +27,11 @@ var Cfg Config
 
 // LoadConfig 加载配置文件
 func LoadConfig() {
-	DoLoadConfig("data/config.yaml", "data/config.local.yaml")
+	configPath := filepath.Join(utils.GetUserHomeAppDir(), "config.yaml")
+	DoLoadConfig(configPath)
 }
 
-func DoLoadConfig(defaultPath, localPath string) (*Config, error) {
+func DoLoadConfig(defaultPath string) (*Config, error) {
 	// 加载默认配置文件
 	Cfg, err := loadConfigFromFile(defaultPath)
 	if err != nil {
@@ -37,15 +40,15 @@ func DoLoadConfig(defaultPath, localPath string) (*Config, error) {
 	}
 
 	// 加载本地配置文件（如果存在）
-	if _, err := os.Stat(localPath); err == nil {
-		localCfg, err := loadConfigFromFile(localPath)
-		if err != nil {
-			log.Printf("Failed to load local config: %v", err)
-		} else {
-			// 覆盖默认配置
-			mergeConfig(Cfg, localCfg)
-		}
-	}
+	// if _, err := os.Stat(localPath); err == nil {
+	// 	localCfg, err := loadConfigFromFile(localPath)
+	// 	if err != nil {
+	// 		log.Printf("Failed to load local config: %v", err)
+	// 	} else {
+	// 		// 覆盖默认配置
+	// 		mergeConfig(Cfg, localCfg)
+	// 	}
+	// }
 
 	return Cfg, nil
 }
@@ -65,16 +68,16 @@ func loadConfigFromFile(path string) (*Config, error) {
 }
 
 // mergeConfig 合并配置（用 localCfg 覆盖 cfg）
-func mergeConfig(cfg, localCfg *Config) {
-	if localCfg.App.Port != 0 {
-		cfg.App.Port = localCfg.App.Port
-	}
+// func mergeConfig(cfg, localCfg *Config) {
+// 	if localCfg.App.Port != 0 {
+// 		cfg.App.Port = localCfg.App.Port
+// 	}
 
-	if localCfg.Dandanplay.AppId != "" {
-		cfg.Dandanplay.AppId = localCfg.Dandanplay.AppId
-	}
+// 	if localCfg.Dandanplay.AppId != "" {
+// 		cfg.Dandanplay.AppId = localCfg.Dandanplay.AppId
+// 	}
 
-	if localCfg.Dandanplay.AppSecret != "" {
-		cfg.Dandanplay.AppSecret = localCfg.Dandanplay.AppSecret
-	}
-}
+// 	if localCfg.Dandanplay.AppSecret != "" {
+// 		cfg.Dandanplay.AppSecret = localCfg.Dandanplay.AppSecret
+// 	}
+// }
