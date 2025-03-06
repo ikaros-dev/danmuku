@@ -21,11 +21,18 @@ type DandanplayConfig struct {
 	AppSecret string `yaml:"appSecret"`
 }
 
+var Cfg Config
+
 // LoadConfig 加载配置文件
-func LoadConfig(defaultPath, localPath string) (*Config, error) {
+func LoadConfig() {
+	DoLoadConfig("config.yaml", "config.local.yaml")
+}
+
+func DoLoadConfig(defaultPath, localPath string) (*Config, error) {
 	// 加载默认配置文件
-	cfg, err := loadConfigFromFile(defaultPath)
+	Cfg, err := loadConfigFromFile(defaultPath)
 	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
 		return nil, err
 	}
 
@@ -36,11 +43,11 @@ func LoadConfig(defaultPath, localPath string) (*Config, error) {
 			log.Printf("Failed to load local config: %v", err)
 		} else {
 			// 覆盖默认配置
-			mergeConfig(cfg, localCfg)
+			mergeConfig(Cfg, localCfg)
 		}
 	}
 
-	return cfg, nil
+	return Cfg, nil
 }
 
 // loadConfigFromFile 从文件加载配置
@@ -50,12 +57,11 @@ func loadConfigFromFile(path string) (*Config, error) {
 		return nil, err
 	}
 
-	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Unmarshal(data, &Cfg); err != nil {
 		return nil, err
 	}
 
-	return &cfg, nil
+	return &Cfg, nil
 }
 
 // mergeConfig 合并配置（用 localCfg 覆盖 cfg）

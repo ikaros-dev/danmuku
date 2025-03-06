@@ -3,6 +3,7 @@ package dandanplay
 import (
 	"log"
 	"run/ikaros/danmuku/config"
+	"run/ikaros/danmuku/utils"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -29,10 +30,11 @@ type SearchEpisodesResponse struct {
 	Animes       []SearchEpisodesAnime `json:"animes"`
 }
 
-func SearchEpisodesWithKeyword(confg config.Config, anime string, episode string) *SearchEpisodesResponse {
+func SearchEpisodesWithKeyword(anime string) *SearchEpisodesResponse {
 	var url = BaseUrl + "/api/v2/search/episodes"
-	var appid = confg.Dandanplay.AppId
-	var appSecret = confg.Dandanplay.AppSecret
+	var conf = config.Cfg
+	var appid = conf.Dandanplay.AppId
+	var appSecret = conf.Dandanplay.AppSecret
 	if Client == nil {
 		Client = resty.New()
 	}
@@ -44,6 +46,8 @@ func SearchEpisodesWithKeyword(confg config.Config, anime string, episode string
 		SetQueryParam("anime", anime).
 		SetResult(&SearchEpisodesResponse{}). // 指定响应的解析类型
 		Get(url)                              // 替换为实际的 API URL
+
+	utils.Debug("Request dandanplay api for url: " + url + "?anime=" + anime)
 
 	// 处理错误
 	if err != nil {
