@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Version = "1.0.0"
+var Version = "1.1.5"
 
 func main() {
 	logrus.Info("Starting application ", "v", Version, " ...")
