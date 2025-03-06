@@ -20,26 +20,59 @@ type AnimeRsp struct {
 	Episodes        []models.Episode `json:"episodes"`
 }
 
-func searchFirstAnim(title string) []AnimeRsp {
-	var myAnimes []models.Anime
-	result := config.DB.Where("anime_title LIKE ?", "%"+title+"%").Find(&myAnimes)
-	if result.Error == nil {
-		// 如果查询到了结果，直接组装带有episode的anime返回
-		var myAnimeRsps []AnimeRsp
-		for _, myAnime := range myAnimes {
-			var episodes []models.Episode
-			config.DB.Where("anime_id = ?", myAnime.AnimeId).Find(&episodes)
-			myAnimeRsps = append(myAnimeRsps, AnimeRsp{
-				AnimeId:         myAnime.AnimeId,
-				AnimeTitle:      myAnime.AnimeTitle,
-				Type:            myAnime.Type,
-				TypeDescription: myAnime.AnimeTitle,
-				Episodes:        episodes,
-			})
-		}
-		return myAnimeRsps
+func searchAnimeRspsWithKeyword(keyword string) []AnimeRsp {
+	var keywordAnimes []models.KeywordAnime
+	res := config.DB.Where("keyword = ?", keyword).Find(&keywordAnimes)
+	if res.Error != nil {
+		return nil
 	}
-	return nil
+
+	var myAnimeRsps []AnimeRsp
+	for _, keyAni := range keywordAnimes {
+		var myAnime models.Anime
+		res2 := config.DB.Where("anime_id = ?", keyAni.AnimeId).First(&myAnime)
+		if res2.Error != nil {
+			continue
+		}
+
+		var myAnimeRsp AnimeRsp = AnimeRsp{
+			AnimeId:         myAnime.AnimeId,
+			AnimeTitle:      myAnime.AnimeTitle,
+			Type:            myAnime.Type,
+			TypeDescription: myAnime.TypeDescription,
+		}
+
+		var episodes []models.Episode
+		res3 := config.DB.Where("anime_id = ?", myAnime.AnimeId).Find(&episodes)
+		if res3.Error != nil {
+			myAnimeRsps = append(myAnimeRsps, myAnimeRsp)
+			continue
+		}
+
+		myAnimeRsp.Episodes = episodes
+		myAnimeRsps = append(myAnimeRsps, myAnimeRsp)
+	}
+
+	return myAnimeRsps
+
+	// result := config.DB.Where("anime_id = ?", ).Find(&myAnimes)
+	// if result.Error == nil {
+	// 	// 如果查询到了结果，直接组装带有episode的anime返回
+	// 	var myAnimeRsps []AnimeRsp
+	// 	for _, myAnime := range myAnimes {
+	// 		var episodes []models.Episode
+	// 		config.DB.Where("anime_id = ?", myAnime.AnimeId).Find(&episodes)
+	// 		myAnimeRsps = append(myAnimeRsps, AnimeRsp{
+	// 			AnimeId:         myAnime.AnimeId,
+	// 			AnimeTitle:      myAnime.AnimeTitle,
+	// 			Type:            myAnime.Type,
+	// 			TypeDescription: myAnime.AnimeTitle,
+	// 			Episodes:        episodes,
+	// 		})
+	// 	}
+	// 	return myAnimeRsps
+	// }
+	// return nil
 }
 
 func SearchEpisodesWithKeyword(c *gin.Context) {
@@ -50,7 +83,7 @@ func SearchEpisodesWithKeyword(c *gin.Context) {
 	}
 
 	// 先搜索数据库，如存在直接响应
-	animeRsps := searchFirstAnim(anime)
+	animeRsps := searchAnimeRspsWithKeyword(anime)
 	if animeRsps != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"animes": animeRsps,
@@ -82,6 +115,11 @@ func SearchEpisodesWithKeyword(c *gin.Context) {
 	}()
 	// 执行数据库操作
 	for _, seAnime := range searchAnimeRsp.Animes {
+		// 提交关键词和animeid纪录
+		tx.Save(&models.KeywordAnime{
+			AnimeId: seAnime.AnimeId,
+			Keyword: anime,
+		})
 		anime := &models.Anime{
 			AnimeId:         seAnime.AnimeId,
 			AnimeTitle:      seAnime.AnimeTitle,
@@ -112,7 +150,7 @@ func SearchEpisodesWithKeyword(c *gin.Context) {
 		return
 	}
 
-	newAnimeRsps := searchFirstAnim(anime)
+	newAnimeRsps := searchAnimeRspsWithKeyword(anime)
 	c.JSON(http.StatusOK, gin.H{
 		"animes": newAnimeRsps,
 	})

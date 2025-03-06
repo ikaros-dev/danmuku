@@ -27,6 +27,7 @@ func main() {
 	config.DB.AutoMigrate(&models.User{})
 	config.DB.AutoMigrate(&models.Anime{})
 	config.DB.AutoMigrate(&models.Episode{})
+	config.DB.AutoMigrate(&models.KeywordAnime{})
 
 	r := gin.Default() // 创建默认路由（含日志和恢复中间件）
 
