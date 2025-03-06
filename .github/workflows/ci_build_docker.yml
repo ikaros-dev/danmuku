@@ -18,7 +18,7 @@ jobs:
           go-version: 1.23.2
 
       - name: Build
-        run: go build -ldflags="-s -w" -trimpath -o myapp .
+        run: go build -ldflags="-s -w" -trimpath -o danmuku .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
