@@ -10,9 +10,14 @@ import (
 	"run/ikaros/danmuku/utils"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/sirupsen/logrus"
 )
 
+var Version = "1.0.0"
+
 func main() {
+	logrus.Info("Starting application ", "v", Version, " ...")
 	utils.SetLogLevel(utils.DebugLevel)
 	// 加载配置文件
 	config.LoadConfig()
@@ -37,8 +42,10 @@ func main() {
 	routes.SetupRouters(r)
 
 	port := config.Cfg.App.Port
-	log.Printf("Starting server on port %d...\n", port)
+	logrus.Info("Starting server on port in ", port)
 	if err := r.Run(":" + fmt.Sprint(port)); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+
+	logrus.Info("Application has started.")
 }
