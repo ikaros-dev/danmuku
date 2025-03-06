@@ -1,4 +1,3 @@
-# 未测试不可用
 FROM golang:1.20-alpine AS builder
 WORKDIR /app
 COPY . .
