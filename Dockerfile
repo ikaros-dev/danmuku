@@ -13,8 +13,14 @@ RUN go build -ldflags="-s -w" -trimpath -o danmuku .
 # 使用轻量级 Alpine 镜像作为运行时环境
 FROM alpine:latest
 
-# 复制编译好的二进制文件
-COPY --from=builder /app/danmuku /danmuku
+# 创建持久化目录
+RUN mkdir /data
+
+# 复制编译好的二进制文件到持久化目录
+COPY --from=builder /app/danmuku /data/danmuku
+
+# 定义持久化目录
+VOLUME /data
 
 # 设置容器启动命令
-CMD ["/danmuku"]
+CMD ["/data/danmuku"]
