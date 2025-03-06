@@ -8,4 +8,5 @@ import (
 
 func SetupDandanplayRoutes(r *gin.Engine) {
 	r.GET("/api/dandanplay/search/episodes", controllers.SearchEpisodesWithKeyword)
+	r.GET("/api/dandanplay/comment/:episodeId", controllers.GetCommentsWithEpisodeId)
 }

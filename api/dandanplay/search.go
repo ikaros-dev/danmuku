@@ -47,7 +47,7 @@ func SearchEpisodesWithKeyword(anime string) *SearchEpisodesResponse {
 		SetResult(&SearchEpisodesResponse{}). // 指定响应的解析类型
 		Get(url)                              // 替换为实际的 API URL
 
-	utils.Debug("Request dandanplay api for url: " + url + "?anime=" + anime)
+	utils.Debug("Request dandanplay SearchEpisodesWithKeyword api for url: " + url + "?anime=" + anime)
 
 	// 处理错误
 	if err != nil {
@@ -63,4 +63,50 @@ func SearchEpisodesWithKeyword(anime string) *SearchEpisodesResponse {
 	searchEpisodesResponse := resp.Result().(*SearchEpisodesResponse)
 
 	return searchEpisodesResponse
+}
+
+// @see https://api.dandanplay.net/swagger/index.html#/%E5%BC%B9%E5%B9%95/Comment_GetComment
+
+type CommentsData struct {
+	Cid int    `json:"cid"`
+	P   string `json:"p"` // 弹幕参数
+	M   string `json:"m"` // 弹幕内容
+}
+
+type CommentResponseV2 struct {
+	Count    int            `json:"count"`
+	Comments []CommentsData `json:"comments"`
+}
+
+func GetCommentsWithEpisodeId(episodeId string) *CommentResponseV2 {
+	var url = BaseUrl + "/api/v2/comment/" + episodeId
+	var conf = config.Cfg
+	var appid = conf.Dandanplay.AppId
+	var appSecret = conf.Dandanplay.AppSecret
+	if Client == nil {
+		Client = resty.New()
+	}
+
+	Client.Header.Add("X-AppId", appid)
+	Client.Header.Add("X-AppSecret", appSecret)
+
+	resp, err := Client.R().
+		SetResult(&CommentResponseV2{}). // 指定响应的解析类型
+		Get(url)                         // 替换为实际的 API URL
+
+	utils.Debug("Request dandanplay GetCommentsWithEpisodeId api for url: " + url)
+
+	// 处理错误
+	if err != nil {
+		log.Fatalf("Req fail: %v", err)
+	}
+
+	// 检查响应状态码
+	if resp.StatusCode() != 200 {
+		log.Fatalf("Rsp status code fail: %s", resp.Status())
+	}
+
+	// 获取解析后的结果
+	commentResponseV2 := resp.Result().(*CommentResponseV2)
+	return commentResponseV2
 }

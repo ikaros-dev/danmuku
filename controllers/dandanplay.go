@@ -117,3 +117,13 @@ func SearchEpisodesWithKeyword(c *gin.Context) {
 		"animes": newAnimeRsps,
 	})
 }
+
+func GetCommentsWithEpisodeId(c *gin.Context) {
+	episodeId := c.Param("episodeId")
+	commentRsps := dandanplay.GetCommentsWithEpisodeId(episodeId)
+	c.JSON(http.StatusOK, gin.H{
+		"comments": commentRsps.Comments,
+		"count":    commentRsps.Count,
+	})
+	return
+}
