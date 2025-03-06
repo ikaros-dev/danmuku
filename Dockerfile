@@ -4,11 +4,11 @@ FROM golang:1.23-alpine AS builder
 # 安装 SQLite 开发库
 RUN apk add --no-cache gcc musl-dev sqlite-dev
 
-# 启用 CGO 并构建程序
-RUN CGO_ENABLED=1 go build -o danmuku .
-
 # 设置工作目录
 WORKDIR /app
+
+# 启用 CGO 并构建程序
+RUN CGO_ENABLED=1 go build -ldflags="-s -w" -trimpath -o danmuku .
 
 # 复制 Go 模块文件并下载依赖
 COPY go.mod go.sum ./
@@ -16,9 +16,6 @@ RUN go mod download
 
 # 复制代码到容器中
 COPY . .
-
-# 编译 Go 应用
-RUN go build -ldflags="-s -w" -trimpath -o danmuku .
 
 # 使用轻量级 Alpine 镜像作为运行时环境
 FROM alpine:latest
