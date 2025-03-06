@@ -14,13 +14,13 @@ RUN go build -ldflags="-s -w" -trimpath -o danmuku .
 FROM alpine:latest
 
 # 创建持久化目录
-RUN mkdir /run
+RUN mkdir /data
 
 # 复制编译好的二进制文件到持久化目录
-COPY --from=builder /app/danmuku /run/danmuku
+COPY --from=builder /app/danmuku /data/danmuku
 
 # 定义持久化目录
-VOLUME /run
+VOLUME /data
 
 # 设置容器启动命令
-CMD ["/run/danmuku"]
+CMD ["/data/danmuku"]
