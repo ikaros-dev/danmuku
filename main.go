@@ -14,10 +14,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var Version = "1.1.5"
-
 func main() {
-	logrus.Info("Starting application ", "v", Version, " ...")
+	logrus.Info("Starting application ", " ...")
 	utils.SetLogLevel(utils.DebugLevel)
 	// 加载配置文件
 	config.LoadConfig()
