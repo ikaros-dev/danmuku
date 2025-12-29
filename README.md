@@ -11,3 +11,9 @@ danmu api server.
 ```
 go build -ldflags="-s -w" -trimpath -o danmuku .
 ```
+
+# run
+
+```
+go run main.go
+```
