@@ -28,6 +28,8 @@ func main() {
 	config.DB.AutoMigrate(&models.Anime{})
 	config.DB.AutoMigrate(&models.Episode{})
 	config.DB.AutoMigrate(&models.KeywordAnime{})
+	config.DB.AutoMigrate(&models.BangumiDetails{})
+	config.DB.AutoMigrate(&models.BangumiEpisode{})
 
 	r := gin.Default() // 创建默认路由（含日志和恢复中间件）
 

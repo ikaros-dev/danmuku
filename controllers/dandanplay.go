@@ -8,6 +8,7 @@ import (
 	"run/ikaros/danmuku/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -154,6 +155,89 @@ func SearchEpisodesWithKeyword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"animes": newAnimeRsps,
 	})
+}
+
+func getBangumiFromDbWithBgmtvSubjectId(bgmtvSubjectId string) *models.BangumiDetails {
+	var bangumiDetails models.BangumiDetails
+	res := config.DB.Where("bgmtv_subject_id = ?", bgmtvSubjectId).Find(&bangumiDetails)
+	if res.Error != nil || bangumiDetails.AnimeId == 0 {
+		return nil
+	}
+	episode := []models.BangumiEpisode{}
+	config.DB.Where("anime_id = ?", bangumiDetails.AnimeId).Find(&episode)
+	bangumiDetails.Episodes = episode
+	return &bangumiDetails
+}
+
+func GetBangumiWithBgmtvSubjectId(c *gin.Context) {
+	bgmtvSubjectId := c.Param("bgmtvSubjectId")
+
+	// 先搜索数据库，如存在直接响应
+	bangumiDetails := getBangumiFromDbWithBgmtvSubjectId(bgmtvSubjectId)
+
+	if bangumiDetails != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"data": bangumiDetails,
+		})
+		return
+	}
+
+	// 如果数据库里没有，则从 dandanplay 查询
+	bangumiDetailsResponse := dandanplay.BangumiGetBangumiDetailsByBgmtvSubjectId(bgmtvSubjectId)
+	logrus.Debug("bangumiDetailsResponse: {}", bangumiDetailsResponse)
+
+	if bangumiDetailsResponse.Bangumi == nil {
+		// 无数据直接返回
+		log.Println("No data found in for bgmtvSubjectId=" + bgmtvSubjectId)
+		c.JSON(http.StatusNotFound, "No data found in for bgmtvSubjectId="+bgmtvSubjectId)
+		return
+	}
+
+	// 有数据则保存到数据库
+	tx := config.DB.Begin()
+	if tx.Error != nil {
+		log.Println("Failed to begin transaction:", tx.Error)
+		return
+	}
+
+	// 确保在发生错误时回滚事务
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			log.Println("Transaction rolled back due to panic:", r)
+		}
+	}()
+	bangumiDetailsResponse.Bangumi.BgmtvSubjectId = bgmtvSubjectId
+	if err := tx.Save(&bangumiDetailsResponse.Bangumi).Error; err != nil {
+		tx.Rollback()
+		log.Println("Failed to save bangumiDetails:", err)
+		return
+	}
+
+	animeId := bangumiDetailsResponse.Bangumi.AnimeId
+
+	episode2 := &bangumiDetailsResponse.Bangumi.Episodes
+	for i := range *episode2 {
+		(*episode2)[i].AnimeId = animeId
+		(*episode2)[i].BgmtvSubjectId = bgmtvSubjectId
+		if err := tx.Save(&(*episode2)[i]).Error; err != nil {
+			tx.Rollback()
+			log.Println("Failed to save episode:", err)
+			continue
+		}
+	}
+
+	// 提交事务
+	if err := tx.Commit().Error; err != nil {
+		log.Println("Failed to commit transaction:", err)
+		return
+	}
+
+	bangumiDetails3 := getBangumiFromDbWithBgmtvSubjectId(bgmtvSubjectId)
+	c.JSON(http.StatusOK, gin.H{
+		"data": bangumiDetails3,
+	})
+	return
 }
 
 func GetCommentsWithEpisodeId(c *gin.Context) {
