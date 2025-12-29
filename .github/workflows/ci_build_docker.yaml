@@ -42,3 +42,4 @@ jobs:
           push: true
           tags: |
             ikarosrun/danmuku:${{  github.ref_name }}
+            ikarosrun/danmuku:latest
